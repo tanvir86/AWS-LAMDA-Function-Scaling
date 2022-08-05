@@ -6,7 +6,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: target/zeronorth-problem-solving-1.0-SNAPSHOT.jar
-      Handler: handler.FuelConsumtionCalculator
+      Handler: handler.FuelConsumptionCalculator
       Runtime: java8
       Description: Java function
       MemorySize: 512

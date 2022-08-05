@@ -6,13 +6,12 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dto.RequestData;
 
-import java.util.Map;
-
-public class FuelConsumtionCalculator implements RequestHandler<Map<String,String>, String> {
+public class FuelConsumptionCalculator implements RequestHandler<RequestData, RequestData> {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     @Override
-    public String handleRequest(Map<String,String> event, Context context)
+    public RequestData handleRequest(RequestData event, Context context)
     {
         LambdaLogger logger = context.getLogger();
         String response = "200 OK";
@@ -22,6 +21,6 @@ public class FuelConsumtionCalculator implements RequestHandler<Map<String,Strin
         // process event
         logger.log("EVENT: " + gson.toJson(event));
         logger.log("EVENT TYPE: " + event.getClass());
-        return response;
+        return event;
     }
 }
