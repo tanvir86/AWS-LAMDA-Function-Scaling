@@ -9,6 +9,15 @@ public class TimedRoute {
     private Double longitude;
     private Double latitude;
 
+    public TimedRoute() {
+    }
+
+    public TimedRoute(String date, Double longitude, Double latitude) {
+        this.date = date;
+        this.longitude = longitude;
+        this.latitude = latitude;
+    }
+
     public ZonedDateTime getDateTime(){
         return date == null ? null : ZonedDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME);
     }

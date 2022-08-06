@@ -4,23 +4,61 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import dto.RequestData;
+import dto.RoutesFuelEfficiency;
+import service.FuelConsumptionCalculatorService;
+import service.WeatherService;
 
-public class FuelConsumptionCalculator implements RequestHandler<RequestData, RequestData> {
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+public class FuelConsumptionCalculator implements RequestHandler<RequestData, List<RoutesFuelEfficiency>> {
+    private WeatherService weatherService;
+
+    public FuelConsumptionCalculator() {
+        this.weatherService = new WeatherService();
+    }
+    public FuelConsumptionCalculator(WeatherService weatherService) {
+        this.weatherService = weatherService;
+    }
+
     @Override
-    public RequestData handleRequest(RequestData event, Context context)
+    public List<RoutesFuelEfficiency> handleRequest(RequestData event, Context context)
     {
         LambdaLogger logger = context.getLogger();
-        String response = "200 OK";
-        // log execution details
-        logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
-        logger.log("CONTEXT: " + gson.toJson(context));
-        // process event
-        logger.log("EVENT: " + gson.toJson(event));
-        logger.log("EVENT TYPE: " + event.getClass());
-        return event;
+
+        try {
+            List<RoutesFuelEfficiency> routesFuelEfficiencyList =  event.getRoutes().stream().parallel()
+                    .map(routes -> new FuelConsumptionCalculatorService(routes, event.getDraught(), event.getImo(),weatherService))
+                    .map(service -> service.getFuelConsumption())
+                    .collect(Collectors.toList());
+
+            RoutesFuelEfficiency minFuelConsumption = routesFuelEfficiencyList.parallelStream()
+                    .min(Comparator.comparing(RoutesFuelEfficiency::getFuelConsumptionInMetricTon))
+                    .get();
+
+            List<RoutesFuelEfficiency> routesFuelEfficiency = routesFuelEfficiencyList.stream()
+                    .map(
+                        new Function<RoutesFuelEfficiency, RoutesFuelEfficiency>() {
+                            @Override
+                            public RoutesFuelEfficiency apply(RoutesFuelEfficiency routesFuelEfficiency) {
+                                if( routesFuelEfficiency.getFuelConsumptionInMetricTon() == minFuelConsumption.getFuelConsumptionInMetricTon())
+                                    routesFuelEfficiency.setEco(Boolean.TRUE);
+                                return routesFuelEfficiency;
+                            }
+                        }
+                    ).collect(Collectors.toList());
+
+            return routesFuelEfficiency;
+        } catch (NoSuchElementException noSuchElementException) {
+            return new ArrayList<RoutesFuelEfficiency>();
+        } catch (Exception exception){
+            throw exception;
+        }
+
     }
 }
