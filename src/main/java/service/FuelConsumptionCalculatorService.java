@@ -105,7 +105,7 @@ public class FuelConsumptionCalculatorService {
     }
 
     private Double getFuelConsumptionByDateAndDuration(LocalDate date, Double durationInHour, Double speedInKnots){
-        Float beaufort = weatherService.getWeatherForecast(date);
+        Float beaufort = weatherService.getWeatherForecast(date.toString());
         return this.fuelConsumptionModelService.getFuelConsumption(this.imo,this.draught,speedInKnots,beaufort)*durationInHour/24;
     }
 
