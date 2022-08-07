@@ -96,7 +96,7 @@ public class FuelConsumptionCalculatorService {
                                 } else {
                                     duration = 24D;
                                 }
-                                return getFuelConsumptionByDateAndDuration(s.toLocalDate(),duration,speedInKnots);
+                                return duration == 0D? 0D : getFuelConsumptionByDateAndDuration(s.toLocalDate(),duration,speedInKnots);
                             }
                         }
                 )
