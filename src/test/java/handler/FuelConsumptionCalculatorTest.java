@@ -9,10 +9,9 @@ import com.amazonaws.services.lambda.runtime.Context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.FuelConsumptionModelService;
 import service.WeatherService;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,16 +41,21 @@ class FuelConsumptionCalculatorTest {
     event.setImo(123456);
 
     WeatherService weatherService = mock(WeatherService.class);
+    FuelConsumptionModelService fuelConsumptionModelService = mock(FuelConsumptionModelService.class);
+
     when(weatherService.getWeatherForecast(any())).thenReturn(.7F);
+    when(fuelConsumptionModelService.isModelExist(any())).thenReturn(Boolean.TRUE);
+    when(fuelConsumptionModelService.getFuelConsumption(any(),any(),any(),any())).thenReturn(1.32D);
 
 
     Context context = new TestContext();
-    FuelConsumptionCalculator handler = new FuelConsumptionCalculator(weatherService);
+    FuelConsumptionCalculator handler = new FuelConsumptionCalculator(weatherService,fuelConsumptionModelService);
 
     List<RoutesFuelEfficiency> result = handler.handleRequest(event, context);
 
     assertNotNull(result);
     assertEquals(result.size(),1);
+    assertEquals(result.get(0).getFuelConsumptionInMetricTon(),5.245166666666667);
   }
 
 }

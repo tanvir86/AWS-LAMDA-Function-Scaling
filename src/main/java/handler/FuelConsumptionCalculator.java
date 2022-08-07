@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import dto.RequestData;
 import dto.RoutesFuelEfficiency;
 import service.FuelConsumptionCalculatorService;
+import service.FuelConsumptionModelService;
 import service.WeatherService;
 
 import java.util.ArrayList;
@@ -18,12 +19,15 @@ import java.util.stream.Collectors;
 
 public class FuelConsumptionCalculator implements RequestHandler<RequestData, List<RoutesFuelEfficiency>> {
     private WeatherService weatherService;
+    private FuelConsumptionModelService fuelConsumptionModelService;
 
     public FuelConsumptionCalculator() {
+        this.fuelConsumptionModelService = new FuelConsumptionModelService();
         this.weatherService = new WeatherService();
     }
-    public FuelConsumptionCalculator(WeatherService weatherService) {
+    public FuelConsumptionCalculator(WeatherService weatherService,FuelConsumptionModelService fuelConsumptionModelService) {
         this.weatherService = weatherService;
+        this.fuelConsumptionModelService = fuelConsumptionModelService;
     }
 
     @Override
@@ -32,8 +36,11 @@ public class FuelConsumptionCalculator implements RequestHandler<RequestData, Li
         LambdaLogger logger = context.getLogger();
 
         try {
+            if(!this.fuelConsumptionModelService.isModelExist(event.getImo())){
+                throw new IllegalArgumentException("No Data with given imo exist.");
+            }
             List<RoutesFuelEfficiency> routesFuelEfficiencyList =  event.getRoutes().stream().parallel()
-                    .map(routes -> new FuelConsumptionCalculatorService(routes, event.getDraught(), event.getImo(),weatherService))
+                    .map(routes -> new FuelConsumptionCalculatorService(routes, event.getDraught(), event.getImo(),weatherService,fuelConsumptionModelService))
                     .map(service -> service.getFuelConsumption())
                     .collect(Collectors.toList());
 

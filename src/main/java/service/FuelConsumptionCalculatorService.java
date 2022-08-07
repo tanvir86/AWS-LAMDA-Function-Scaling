@@ -21,12 +21,21 @@ public class FuelConsumptionCalculatorService {
     private Integer imo;
 
     private WeatherService weatherService;
+    private FuelConsumptionModelService fuelConsumptionModelService;
 
     public FuelConsumptionCalculatorService(List<TimedRoute> instructions, Float draught, Integer imo, WeatherService weatherService) {
         this.instructions = instructions;
         this.draught = draught;
         this.imo = imo;
         this.weatherService = weatherService;
+    }
+
+    public FuelConsumptionCalculatorService(List<TimedRoute> instructions, Float draught, Integer imo, WeatherService weatherService, FuelConsumptionModelService fuelConsumptionModelService) {
+        this.instructions = instructions;
+        this.draught = draught;
+        this.imo = imo;
+        this.weatherService = weatherService;
+        this.fuelConsumptionModelService = fuelConsumptionModelService;
     }
 
     /**
@@ -97,9 +106,7 @@ public class FuelConsumptionCalculatorService {
 
     private Double getFuelConsumptionByDateAndDuration(LocalDate date, Double durationInHour, Double speedInKnots){
         Float beaufort = weatherService.getWeatherForecast(date);
-
-        // ToDo: Call Model To Get FuelConsumption
-        return new Double(beaufort);
+        return this.fuelConsumptionModelService.getFuelConsumption(this.imo,this.draught,speedInKnots,beaufort)*durationInHour/24;
     }
 
 
