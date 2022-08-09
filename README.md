@@ -92,9 +92,14 @@ To delete the application, run `4-cleanup.sh`.
 
 ![Solution Architecture](images/Solution%20Architecture.png)
 
-1. Feature task(API request) can be break down to lots of independent task/calculation, to keep the API response time within acceptable minimum, I tried to add parallel processing (threading) for these task.
+## Why AWS Lambda?
+- Our other option EC2 instance is a bit overkill as  our solution was to provide a single API. Using EC2, we had to make at least 2 instance up and running all the time for high availability, So in off-peak time we would have to waste lots of compute time / money.
+- Another aspect is the scaling requirement of 25k+ TPS for optimisation team. For this, our scaling options in case of EC2 are over-provisioning or Automatic Scaling. For over-provisioning new request processing start instantly whereas Autoscaling will take ~5 minutes. But Over-provisioning is highly costly. But with other alternative Serverless Lambda, we can setup auto-scaling with minimum processing start time and this is far less costly than EC2 solution.  
+
+## Solution process
+1. Feature task(API request) can be broken down to lots of independent task/calculation; to keep the API response time within acceptable minimum, I tried to add parallel processing (threading) for these task.
    - Maybe we can choose another Language which has better support for concurrency & multiprocessing.
-2. Weather API request is Blocking i/o in respect to our solution - API request can take variable amount of time, also the huge number of Weather API request needed for our solution makes it worse. However, we are doing same request multiple times which can be avoided by using caching. I have added simple in-memory cache. Moreover, I only considered the scenario where every Weather api call is successful (return 200 status code within acceptable time)
+2. Weather API request is Blocking i/o in respect to our solution - API request can take variable amount of time, also the huge number of Weather API request needed for our solution makes it worse. However, we are doing same request multiple times which can be avoided by using caching. I have added simple in-memory cache. Moreover, I only considered the scenario where every Weather api call is successful (return 200 status code within acceptable time) in the project code.
   - Need to add fault tolerance for scenario like network partition, Weather Service down, takes long time to response.
   - Need to add separate Caching Service like ElastiCache for weather response caching. Doing so, all lambda function instances will be able to use the same cache data. But need to consider the cache eviction policy.
 3. Query Value from Fuel Table: This seems to be classic Regression Machine Learning problem. I trained linear regression model for each vessel. But accuracy is terrible.
