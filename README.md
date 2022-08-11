@@ -105,6 +105,22 @@ To delete the application, run `4-cleanup.sh`.
 3. Query Value from Fuel Table: This seems to be classic Regression Machine Learning problem. I trained linear regression model for each vessel. But accuracy is terrible.
    - Need to improve accuracy, consider other regression model.
 
-# Scaling
-COMING SOON ................
+# Scaling up-to 25k+
+We have to Consider All of our services namely API Gateway, Lambda Function, ElastiCache and Weather Service for this scaling requirement.
 
+## Lambda Function Scaling:
+- Here, For Lambda function AWS regional Concurrency quota by default is 1000. So we have to increase the concurrency quota to our desired Concurrency likely 25k+. (It is important to keep in mind, concurrency limit is shared across all the functions in your account that are in a specific AWS Region).
+- Now our Function should be able to handle 25K + concurrent request. But by default lambda provisioned function when new request comes. And here comes burst concurrency limit. Which vary dependent on region. In EU (Ireland), it is 3000. So if request start to come more than 3000 at a time, aws will add new container at 500/min rate after initial burst of 3000. So we will get request throttling error (429 status code).
+- Here comes `Provisioned concurrency`. When you configure a number for provisioned concurrency, Lambda initializes that number of execution environments. Your function is ready to serve a burst of incoming requests with very low latency. So we have to provisioned concurrency to 25k+!.
+- But Lambda incur charges for provisioned concurrency. Moreover, We will not require 25k+ concurrency all the time. In this case, we can use autoscaling for provisioned concurrency. We can create a target tracking scaling policy that adjusts provisioned concurrency levels automatically, based on the utilization metric that Lambda emits.
+
+## API gateway Scaling:
+- Here default quota per account per region is "10,000 requests per second (RPS) with an additional burst capacity provided by the token bucket algorithm, using a maximum bucket capacity of 5,000 requests". So we have to increase this quota to handle our workload.
+
+## ElastiCache
+- if each API request create 10 concurrent ElastiCache request then Elasticache have to handle 250K concurrent request (for 25k concurrent api request).
+
+## Weather Service
+- If 20% of the above request is a cache miss, then weather service have to handle (250k * 20% =) 50k on average. But request spike can happen when cache data is empty and request comes at our API in Burst.
+
+I have tried to address all the critical area for this requirement (25k+ request). But in practice, after addressing the above mentioned area, we need to do load test to assess our service behavior before going to production. 
