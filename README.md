@@ -100,8 +100,8 @@ To delete the application, run `4-cleanup.sh`.
 1. Feature task(API request) can be broken down to lots of independent task/calculation; to keep the API response time within acceptable minimum, I tried to add parallel processing (threading) for these task.
    - Maybe we can choose another Language which has better support for concurrency & multiprocessing.
 2. Weather API request is Blocking i/o in respect to our solution - API request can take variable amount of time, also the huge number of Weather API request needed for our solution makes it worse. However, we are doing same request multiple times which can be avoided by using caching. I have added simple in-memory cache. Moreover, I only considered the scenario where every Weather api call is successful (return 200 status code within acceptable time) in the project code.
-  - Need to add fault tolerance for scenario like network partition, Weather Service down, takes long time to response.
-  - Need to add separate Caching Service like ElastiCache for weather response caching. Doing so, all lambda function instances will be able to use the same cache data. But need to consider the cache eviction policy.
+   - Need to add fault tolerance for scenario like network partition, Weather Service down, takes long time to response.
+   - Need to add separate Caching Service like ElastiCache for weather response caching. Doing so, all lambda function instances will be able to use the same cache data. But need to consider the cache eviction policy.
 3. Query Value from Fuel Table: This seems to be classic Regression Machine Learning problem. I trained linear regression model for each vessel. But accuracy is terrible.
    - Need to improve accuracy, consider other regression model.
 
