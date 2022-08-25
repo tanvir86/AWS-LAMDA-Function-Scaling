@@ -104,6 +104,9 @@ To delete the application, run `4-cleanup.sh`.
    - Need to add separate Caching Service like ElastiCache for weather response caching. Doing so, all lambda function instances will be able to use the same cache data. But need to consider the cache eviction policy.
 3. Query Value from Fuel Table: This seems to be classic Regression Machine Learning problem. I trained linear regression model for each vessel. But accuracy is terrible.
    - Need to improve accuracy, consider other regression model.
+4. Fitting the Model in the Solution: I have hardcoded the model date in the solution for the demo purpose.
+   - We need to consider the case wheather these model will only be used by this lamda only. If yes then it is ok to integrate into our lamda, but if not, then it is better to build a service/lamda serving these model only. So our application will be de-couoled, and when new model comes/changed, we will need to change in only one place.
+   - Now even if we add these model in our lamda, we need to add in a way that model data change or new model add can be done dynamically. In that case, it will be best to get the model data from a database.
 
 # Scaling up-to 25k+
 We have to Consider All of our services namely API Gateway, Lambda Function, ElastiCache and Weather Service for this scaling requirement.
