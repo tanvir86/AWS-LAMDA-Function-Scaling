@@ -3,6 +3,7 @@
 ![Architecture](images/sample-java-basic.png)
 
 The project source includes function code and supporting resources:
+- `ZN coding challege.pdf` - Problem specification.
 - `src/main` - A Java Function in `handler`.
 - `src/test` - A unit test and helper classes.
 - `notebokes` - Regression Model from given data source.
@@ -11,7 +12,6 @@ The project source includes function code and supporting resources:
 - `build.gradle` - A Gradle build file.
 - `pom.xml` - A Maven build file.
 - `1-create-bucket.sh`, `2-deploy.sh`, etc. - Shell scripts that use the AWS CLI to deploy and manage the application.
-- `ZN coding challege.pdf` - Problem specification.
 
 Use the following instructions to deploy the sample application.
 
